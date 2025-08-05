@@ -61,6 +61,13 @@ class UserService {
     return this.makeRequest(`/${id}/holdings`);
   }
 
+<<<<<<< HEAD
+=======
+  async getHoldingsPrices(id) {
+    return this.makeRequest(`/${id}/holdings/prices`);
+  }
+
+>>>>>>> origin/main
   async getTransactions(id) {
     return this.makeRequest(`/${id}/transactions`);
   }
