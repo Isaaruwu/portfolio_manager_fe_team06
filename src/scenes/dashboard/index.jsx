@@ -20,12 +20,12 @@ const Dashboard = () => {
   const [error, setError] = useState(null);
   const [orderModalOpen, setOrderModalOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [balance, setBalance] = useState(null);
 
   const handleOrderClose = () => {
     setOrderModalOpen(false);
     setRefreshKey(prev => prev + 1);
   };
-  const [balance, setBalance] = useState(null);
 
   useEffect(() => {
     const fetchTransactions = async () => {
