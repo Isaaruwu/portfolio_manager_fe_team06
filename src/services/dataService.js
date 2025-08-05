@@ -1,6 +1,6 @@
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL + '/transaction';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL + '/data';
 
-class TransactionService {
+class DataService {
   constructor() {
     this.baseURL = API_BASE_URL;
   }
@@ -32,17 +32,17 @@ class TransactionService {
     }
   }
 
-  async newTransaction(transactionData) {
-    return this.makeRequest('/', {
-      method: 'POST',
-      body: JSON.stringify(transactionData),
-    });
+  async getSymbolData(symbol) {
+    return this.makeRequest(`/${symbol}`);
+  }
+
+  async getAllData() {
+    return this.makeRequest(`/`);
   }
 }
 
 
+const dataService = new DataService();
+export default dataService;
 
-const transactionService = new TransactionService();
-export default transactionService;
-
-export { TransactionService };
+export { DataService };
