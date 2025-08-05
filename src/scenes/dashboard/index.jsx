@@ -6,6 +6,7 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import Header from "../../components/Header";
 import Portfolio from "../../components/Portfolio";
 import StatBox from "../../components/StatBox";
+import Order from "../../components/Order";
 
 import ProgressCircle from "../../components/ProgressCircle";
 import userService from "../../services/userService";
@@ -17,13 +18,21 @@ const Dashboard = () => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [orderModalOpen, setOrderModalOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const handleOrderClose = () => {
+    setOrderModalOpen(false);
+    setRefreshKey(prev => prev + 1);
+  };
 
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
         setLoading(true);
         const data = await userService.getTransactions(1);
-        setTransactions(data);
+        const sortedData = data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        setTransactions(sortedData);
         setError(null);
       } catch (err) {
         console.error('Failed to fetch transactions:', err);
@@ -34,7 +43,7 @@ const Dashboard = () => {
     };
 
     fetchTransactions();
-  }, []);
+  }, [refreshKey]);
 
   return (
     <Box m="20px">
@@ -105,8 +114,7 @@ const Dashboard = () => {
               },
             }}
             onClick={() => {
-              // Add your order logic here
-              console.log("Order button clicked");
+              setOrderModalOpen(true);
             }}
           >
             Place Order
@@ -137,7 +145,7 @@ const Dashboard = () => {
             </Box>
           </Box>
           <Box m="20px 0 0 0">
-            <Portfolio />
+            <Portfolio key={refreshKey} />
           </Box>
         </Box>
         <Box
@@ -211,7 +219,7 @@ const Dashboard = () => {
           )}
         </Box>
 
-        {/* ROW 3 */}
+
         <Box
           gridColumn="span 4"
           gridRow="span 2"
@@ -239,6 +247,13 @@ const Dashboard = () => {
           </Box>
         </Box>
       </Box>
+
+      {orderModalOpen && (
+        <Order
+          open={orderModalOpen}
+          onClose={handleOrderClose}
+        />
+      )}
     </Box>
   );
 };
