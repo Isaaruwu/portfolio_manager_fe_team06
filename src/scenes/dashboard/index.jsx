@@ -50,15 +50,14 @@ const Dashboard = () => {
     const fetchBalance = async () => {
       try {
         const data = await userService.getBalance(1);
-        console.log("Balance API response:", data);
-        setBalance(data.balance);
+        setBalance(data);
       } catch (err) {
         console.error("Failed to fetch balance:", err);
       }
     };
 
     fetchBalance();
-  }, []);
+  }, [refreshKey]);
 
 return (
   <Box m="20px">
@@ -96,7 +95,7 @@ return (
         justifyContent="center"
       >
         <StatBox
-          title={balance ? `$${balance.toLocaleString()}` : "Loading..."}
+          title={balance != null ? `$${balance.toLocaleString()}` : "Loading..."}
           subtitle="User Balance"
           progress="0.80"
           icon={
@@ -104,7 +103,6 @@ return (
               sx={{ color: colors.greenAccent[600], fontSize: "26px" }}
             />
           }
-          increase="+20%"
         />
       </Box>
 
