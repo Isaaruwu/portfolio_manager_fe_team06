@@ -6,7 +6,7 @@ import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import userService from "../../services/userService";
 
-const Topbar = () => {
+const Topbar = ({ setIsSidebar, onDepositSuccess }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const colorMode = useContext(ColorModeContext);
@@ -26,9 +26,15 @@ const Topbar = () => {
 
   const handleDepositSubmit = async () => {
     if (depositAmount && parseFloat(depositAmount) > 0) {
-      await userService.deposit(1, parseFloat(depositAmount));
-      console.log('Depositing:', depositAmount);
-      handleDepositClose();
+      try {
+        await userService.deposit(1, parseFloat(depositAmount));
+        handleDepositClose();
+        if (onDepositSuccess) {
+          onDepositSuccess();
+        }
+      } catch (error) {
+        console.error('Deposit failed:', error);
+      }
     }
   };
 

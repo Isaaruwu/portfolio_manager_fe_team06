@@ -24,7 +24,6 @@ const PieChart = () => {
             color: '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')
           }));
           setAllocation(dataWithColors);
-          console.log('Allocation data:', dataWithColors);
         } catch (err) {
           console.error('Failed to fetch stock data:', err);
         }

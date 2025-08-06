@@ -1,6 +1,6 @@
 import { Box, Typography, useTheme, Button, Snackbar, Alert } from "@mui/material";
 import { tokens } from "../../theme";
-import TrafficIcon from "@mui/icons-material/Traffic";
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import TimelineOutlinedIcon from "@mui/icons-material/TimelineOutlined";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import Header from "../../components/Header";
@@ -11,14 +11,17 @@ import Order from "../../components/Order";
 import userService from "../../services/userService";
 import { useState, useEffect } from "react";
 
-const Dashboard = () => {
+const Dashboard = ({ refreshKey: externalRefreshKey = 0 }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [transactions, setTransactions] = useState([]);
+  const [unrealizedGain, setUnrealizedGain] = useState(null);
+  const [realizedGain, setRealizedGain] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [orderModalOpen, setOrderModalOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [balance, setBalance] = useState(null);
   const [showOrderSuccess, setShowOrderSuccess] = useState(false);
 
   const handleOrderClose = (orderSubmitted = false) => {
@@ -52,14 +55,49 @@ const Dashboard = () => {
       }
     };
 
-    fetchTransactions();
-  }, [refreshKey]);
+    const fetchUnrealizedGains = async () => {
+      try {
+        const gain = await userService.getUnrealizedGains(1); 
+        setUnrealizedGain(gain);
+      } catch (err) {
+        console.error("Failed to fetch unrealized gains:", err);
+        setUnrealizedGain(null);
+      }
+    };
 
-  return (
-    <Box m="20px">
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Header title="DASHBOARD" subtitle="Welcome to your dashboard" />
-      </Box>
+    const fetchRealizedGains = async () => {
+      try {
+        const gain = await userService.getRealizedGains(1); 
+        setRealizedGain(gain);
+      } catch (err) {
+        console.error("Failed to fetch realized gains:", err);
+        setRealizedGain(null);
+      }
+    };
+    fetchRealizedGains();
+  
+    fetchUnrealizedGains();
+    fetchTransactions();
+  }, [refreshKey, externalRefreshKey]);
+
+  useEffect(() => {
+    const fetchBalance = async () => {
+      try {
+        const data = await userService.getBalance(1);
+        setBalance(data);
+      } catch (err) {
+        console.error("Failed to fetch balance:", err);
+      }
+    };
+
+    fetchBalance();
+  }, [refreshKey, externalRefreshKey]);
+
+return (
+  <Box m="20px">
+    <Box display="flex" justifyContent="space-between" alignItems="center">
+      <Header title="DASHBOARD" subtitle="Welcome to your dashboard" />
+    </Box>
 
       <Box
         display="grid"
@@ -77,12 +115,12 @@ const Dashboard = () => {
           <StatBox
             title="Unrealized Gains"
             subtitle=""
-            progress="0.75"
-            increase="+14%"
+            progress={unrealizedGain !== null ? (unrealizedGain / 100).toFixed(2) : 0}
+            increase={unrealizedGain !== null ? `${unrealizedGain.toFixed(2)}%` : "N/A"}
             icon={<TimelineOutlinedIcon />}
           />
         </Box>
-        
+
         <Box
           gridColumn="span 3"
           display="flex"
@@ -90,20 +128,34 @@ const Dashboard = () => {
           justifyContent="center"
         >
           <StatBox
-            title="1,325,134"
-            subtitle="Traffic Received"
-            progress="0.80"
-            increase="+43%"
-            icon={
-              <TrafficIcon
-                sx={{ color: colors.greenAccent[600], fontSize: "26px" }}
-              />
-            }
+            title="Realized Gains"
+            subtitle=""
+            progress={realizedGain !== null ? (realizedGain / 100).toFixed(2) : 0}
+            increase={realizedGain !== null ? `${realizedGain.toFixed(2)}%` : "N/A"}
+            icon={<TimelineOutlinedIcon />}
           />
         </Box>
+        
+        <Box
+        gridColumn="span 3"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <StatBox
+          title={balance != null ? `$${balance.toLocaleString()}` : "Loading..."}
+          subtitle="User Balance"
+          progress="0.80"
+          icon={
+            <AccountBalanceIcon
+              sx={{ color: colors.greenAccent[600], fontSize: "26px" }}
+            />
+          }
+        />
+      </Box>
 
         <Box
-          gridColumn="span 6"
+          gridColumn="span 3"
           display="flex"
           alignItems="center"
           justifyContent="flex-end"
