@@ -58,7 +58,7 @@ const Dashboard = ({ refreshKey: externalRefreshKey = 0 }) => {
     const fetchUnrealizedGains = async () => {
       try {
         const gain = await userService.getUnrealizedGains(1); 
-        setUnrealizedGain(gain);
+        if (gain.length > 0) {setUnrealizedGain(gain);}
       } catch (err) {
         console.error("Failed to fetch unrealized gains:", err);
         setUnrealizedGain(null);
@@ -67,8 +67,9 @@ const Dashboard = ({ refreshKey: externalRefreshKey = 0 }) => {
 
     const fetchRealizedGains = async () => {
       try {
-        const gain = await userService.getRealizedGains(1); 
-        setRealizedGain(gain);
+        const gain = await userService.getRealizedGains(1);
+        if (gain.length > 0) {setRealizedGain(gain);}
+        console.log('rel', gain);
       } catch (err) {
         console.error("Failed to fetch realized gains:", err);
         setRealizedGain(null);
@@ -115,8 +116,8 @@ return (
           <StatBox
             title="Unrealized Gains"
             subtitle=""
-            progress={unrealizedGain !== null ? (unrealizedGain / 100).toFixed(2) : 0}
-            increase={unrealizedGain !== null ? `${unrealizedGain.toFixed(2)}%` : "N/A"}
+            progress={unrealizedGain !== null? (unrealizedGain / 100).toFixed(2) : 0}
+            increase={unrealizedGain !== null? `${unrealizedGain.toFixed(2)}%` : "N/A"}
             icon={<TimelineOutlinedIcon />}
           />
         </Box>
@@ -143,7 +144,7 @@ return (
         justifyContent="center"
       >
         <StatBox
-          title={balance != null ? `$${balance.toLocaleString()}` : "Loading..."}
+          title={balance != null ? `$${balance.toLocaleString()}` : "N/A"}
           subtitle="User Balance"
           progress="0.80"
           icon={
