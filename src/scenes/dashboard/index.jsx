@@ -1,4 +1,4 @@
-import { Box, Typography, useTheme, Button } from "@mui/material";
+import { Box, Typography, useTheme, Button, Snackbar, Alert } from "@mui/material";
 import { tokens } from "../../theme";
 import TrafficIcon from "@mui/icons-material/Traffic";
 import TimelineOutlinedIcon from "@mui/icons-material/TimelineOutlined";
@@ -19,10 +19,21 @@ const Dashboard = () => {
   const [error, setError] = useState(null);
   const [orderModalOpen, setOrderModalOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [showOrderSuccess, setShowOrderSuccess] = useState(false);
 
-  const handleOrderClose = () => {
+  const handleOrderClose = (orderSubmitted = false) => {
     setOrderModalOpen(false);
     setRefreshKey(prev => prev + 1);
+    if (orderSubmitted) {
+      setShowOrderSuccess(true);
+    }
+  };
+
+  const handleSuccessClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setShowOrderSuccess(false);
   };
 
   useEffect(() => {
@@ -213,6 +224,32 @@ const Dashboard = () => {
           onClose={handleOrderClose}
         />
       )}
+
+      <Snackbar
+        open={showOrderSuccess}
+        autoHideDuration={4000}
+        onClose={handleSuccessClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ zIndex: 9999 }}
+      >
+        <Alert 
+          onClose={handleSuccessClose} 
+          severity="success" 
+          sx={{ 
+            width: '100%',
+            backgroundColor: colors.greenAccent[600],
+            color: colors.grey[100],
+            '& .MuiAlert-icon': {
+              color: colors.grey[100]
+            },
+            '& .MuiAlert-action': {
+              color: colors.grey[100]
+            }
+          }}
+        >
+          Order placed successfully!
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
