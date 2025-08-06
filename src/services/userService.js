@@ -53,6 +53,13 @@ class UserService {
     });
   }
 
+  async deposit(id, amount) {
+    return this.makeRequest(`/${id}/deposit`, {
+      method: 'POST',
+      body: JSON.stringify({'ammount': amount}),
+    });
+  }
+
   async getBalance(id) {
     return this.makeRequest(`/${id}/balance`);
   }
