@@ -1,8 +1,10 @@
-import { Box, Typography, useTheme } from "@mui/material";
+import { Box, Typography, useTheme, IconButton, Tooltip } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../theme";
 import { useState, useEffect } from "react";
 import userService from "../services/userService";
+import dataService from "../services/dataService";
+import RefreshIcon from "@mui/icons-material/Refresh";
 
 const Portfolio = () => {
   const theme = useTheme();
@@ -10,28 +12,60 @@ const Portfolio = () => {
   const [holdings, setHoldings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [lastUpdated, setLastUpdated] = useState(null);
+
+
+  const fetchHoldings = async () => {
+    try {
+      const data = await userService.getHoldings(1);
+      
+      const holdingsWithPrices = await Promise.all(
+        data.map(async (holding) => {
+          try {
+            const priceData = await dataService.getSymbolData(holding.ticker);
+            return {
+              ...holding,
+              currentPrice: priceData.Close
+            };
+          } catch (error) {
+            console.error(`Failed to fetch price for ${holding.ticker}:`, error);
+            return {
+              ...holding,
+              currentPrice: 0 
+            };
+          }
+        })
+      );
+      
+      setHoldings(holdingsWithPrices);
+      setError(null);
+      setLastUpdated(new Date());
+    } catch (err) {
+      console.error('Failed to fetch holdings:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleManualRefresh = async () => {
+    setLoading(true);
+    await fetchHoldings();
+  };
 
   useEffect(() => {
-    const fetchHoldings = async () => {
-      try {
-        setLoading(true);
-        const data = await userService.getHoldings(1);
-        const currentPrices = await userService.getHoldingsPrices(1);
-        const holdingsWithPrices = data.map(holding => ({
-            ...holding,
-            currentPrice: currentPrices[holding.ticker],
-        }));
-        setHoldings(holdingsWithPrices);
-        setError(null);
-      } catch (err) {
-        console.error('Failed to fetch holdings:', err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
+    const initialLoad = async () => {
+      setLoading(true);
+      await fetchHoldings();
     };
+    
+    initialLoad();
 
-    fetchHoldings();
+    const interval = setInterval(async () => {
+      await fetchHoldings();
+    }, 10000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const columns = [
@@ -77,6 +111,43 @@ const Portfolio = () => {
 
   return (
     <Box m="20px">
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+        <Box>
+          <Typography variant="h4" color={colors.grey[100]} fontWeight="600">
+            Portfolio Holdings
+          </Typography>
+          {lastUpdated && (
+            <Typography variant="body2" color={colors.grey[300]}>
+              Auto-refresh every 10s
+            </Typography>
+          )}
+        </Box>
+        <Tooltip title="Refresh Holdings">
+          <IconButton 
+            onClick={handleManualRefresh}
+            disabled={loading}
+            sx={{ 
+              color: colors.grey[100],
+              '&:hover': {
+                backgroundColor: colors.primary[300],
+              }
+            }}
+          >
+            <RefreshIcon sx={{ 
+              animation: loading ? 'spin 1s linear infinite' : 'none',
+              '@keyframes spin': {
+                '0%': {
+                  transform: 'rotate(0deg)',
+                },
+                '100%': {
+                  transform: 'rotate(360deg)',
+                },
+              },
+            }} />
+          </IconButton>
+        </Tooltip>
+      </Box>
+      
       <Box
         height="75vh"
         sx={{
@@ -131,7 +202,7 @@ const Portfolio = () => {
             </Typography>
           </Box>
         ) : (
-            <Box height="500px">
+            <Box height="680px">
                 <DataGrid 
                   rows={holdings} 
                   columns={columns}

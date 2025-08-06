@@ -1,4 +1,4 @@
-import { Box, Typography, useTheme, Button } from "@mui/material";
+import { Box, Typography, useTheme, Button, Snackbar, Alert } from "@mui/material";
 import { tokens } from "../../theme";
 import TrafficIcon from "@mui/icons-material/Traffic";
 import TimelineOutlinedIcon from "@mui/icons-material/TimelineOutlined";
@@ -6,8 +6,8 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import Header from "../../components/Header";
 import Portfolio from "../../components/Portfolio";
 import StatBox from "../../components/StatBox";
+import Order from "../../components/Order";
 
-import ProgressCircle from "../../components/ProgressCircle";
 import userService from "../../services/userService";
 import { useState, useEffect } from "react";
 
@@ -19,13 +19,32 @@ const Dashboard = () => {
   const [realizedGain, setRealizedGain] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [orderModalOpen, setOrderModalOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [showOrderSuccess, setShowOrderSuccess] = useState(false);
+
+  const handleOrderClose = (orderSubmitted = false) => {
+    setOrderModalOpen(false);
+    setRefreshKey(prev => prev + 1);
+    if (orderSubmitted) {
+      setShowOrderSuccess(true);
+    }
+  };
+
+  const handleSuccessClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setShowOrderSuccess(false);
+  };
 
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
         setLoading(true);
         const data = await userService.getTransactions(1);
-        setTransactions(data);
+        const sortedData = data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        setTransactions(sortedData);
         setError(null);
       } catch (err) {
         console.error('Failed to fetch transactions:', err);
@@ -58,7 +77,7 @@ const Dashboard = () => {
   
     fetchUnrealizedGains();
     fetchTransactions();
-  }, []);
+  }, [refreshKey]);
 
   return (
     <Box m="20px">
@@ -69,12 +88,12 @@ const Dashboard = () => {
       <Box
         display="grid"
         gridTemplateColumns="repeat(12, 1fr)"
-        gridAutoRows="140px"
         gap="20px"
+        mb="40px"
+        height="50px"
       >
         <Box
           gridColumn="span 3"
-          backgroundColor={colors.primary[400]}
           display="flex"
           alignItems="center"
           justifyContent="center"
@@ -106,7 +125,6 @@ const Dashboard = () => {
         
         <Box
           gridColumn="span 3"
-          backgroundColor={colors.primary[400]}
           display="flex"
           alignItems="center"
           justifyContent="center"
@@ -145,44 +163,32 @@ const Dashboard = () => {
               },
             }}
             onClick={() => {
-              // Add your order logic here
-              console.log("Order button clicked");
+              setOrderModalOpen(true);
             }}
           >
             Place Order
           </Button>
         </Box>
+      </Box>
 
-        {/* ROW 2 */}
+      <Box
+        display="grid"
+        gridTemplateColumns="repeat(12, 1fr)"
+        gridAutoRows="140px"
+        gap="20px"
+      >
         <Box
           gridColumn="span 8"
-          gridRow="span 4"
+          gridRow="span 5"
           backgroundColor={colors.primary[400]}
         >
-          <Box
-            mt="25px"
-            p="0 30px"
-            display="flex "
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Box>
-              <Typography
-                variant="h3"
-                fontWeight="bold"
-                color={colors.grey[100]}
-              >
-                Holdings
-              </Typography>
-            </Box>
-          </Box>
           <Box m="20px 0 0 0">
-            <Portfolio />
+            <Portfolio key={refreshKey} />
           </Box>
         </Box>
         <Box
           gridColumn="span 4"
-          gridRow="span 3"
+          gridRow="span 5"
           backgroundColor={colors.primary[400]}
           overflow="auto"
         >
@@ -231,7 +237,7 @@ const Dashboard = () => {
                 <Box color={colors.grey[100]}>{transaction.quantity}</Box>
                 {transaction.quantity < 0 ? (
                   <Box
-                    backgroundColor={colors.redAccent[500]}
+                    backgroundColor={colors.greenAccent[500]}
                     p="5px 10px"
                     borderRadius="4px"
                   >
@@ -239,7 +245,7 @@ const Dashboard = () => {
                   </Box> 
                 ) : (
                   <Box
-                    backgroundColor={colors.greenAccent[500]}
+                    backgroundColor={colors.redAccent[500]}
                     p="5px 10px"
                     borderRadius="4px"
                   >
@@ -250,35 +256,40 @@ const Dashboard = () => {
             ))
           )}
         </Box>
-
-        {/* ROW 3 */}
-        <Box
-          gridColumn="span 4"
-          gridRow="span 2"
-          backgroundColor={colors.primary[400]}
-          p="30px"
-        >
-          <Typography variant="h5" fontWeight="600">
-            Campaign
-          </Typography>
-          <Box
-            display="flex"
-            flexDirection="column"
-            alignItems="center"
-            mt="25px"
-          >
-            <ProgressCircle size="125" />
-            <Typography
-              variant="h5"
-              color={colors.greenAccent[500]}
-              sx={{ mt: "15px" }}
-            >
-              $48,352 revenue generated
-            </Typography>
-            <Typography>Includes extra misc expenditures and costs</Typography>
-          </Box>
-        </Box>
       </Box>
+
+      {orderModalOpen && (
+        <Order
+          open={orderModalOpen}
+          onClose={handleOrderClose}
+        />
+      )}
+
+      <Snackbar
+        open={showOrderSuccess}
+        autoHideDuration={4000}
+        onClose={handleSuccessClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ zIndex: 9999 }}
+      >
+        <Alert 
+          onClose={handleSuccessClose} 
+          severity="success" 
+          sx={{ 
+            width: '100%',
+            backgroundColor: colors.greenAccent[600],
+            color: colors.grey[100],
+            '& .MuiAlert-icon': {
+              color: colors.grey[100]
+            },
+            '& .MuiAlert-action': {
+              color: colors.grey[100]
+            }
+          }}
+        >
+          Order placed successfully!
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

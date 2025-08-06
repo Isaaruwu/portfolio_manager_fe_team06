@@ -54,11 +54,15 @@ class UserService {
   }
 
   async getBalance(id) {
-    // TODO:
+    return this.makeRequest(`/${id}/balance`);
   }
 
   async getHoldings(id) {
     return this.makeRequest(`/${id}/holdings`);
+  }
+
+  async getAssetAllocation(id) {
+    return this.makeRequest(`/${id}/allocation`);
   }
 
   async getHoldingsPrices(id) {
