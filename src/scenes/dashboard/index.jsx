@@ -15,6 +15,8 @@ const Dashboard = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [transactions, setTransactions] = useState([]);
+  const [unrealizedGain, setUnrealizedGain] = useState(null);
+  const [realizedGain, setRealizedGain] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -33,6 +35,28 @@ const Dashboard = () => {
       }
     };
 
+    const fetchUnrealizedGains = async () => {
+      try {
+        const gain = await userService.getUnrealizedGains(1); 
+        setUnrealizedGain(gain);
+      } catch (err) {
+        console.error("Failed to fetch unrealized gains:", err);
+        setUnrealizedGain(null);
+      }
+    };
+
+    const fetchRealizedGains = async () => {
+      try {
+        const gain = await userService.getRealizedGains(1); 
+        setRealizedGain(gain);
+      } catch (err) {
+        console.error("Failed to fetch realized gains:", err);
+        setRealizedGain(null);
+      }
+    };
+    fetchRealizedGains();
+  
+    fetchUnrealizedGains();
     fetchTransactions();
   }, []);
 
@@ -58,8 +82,24 @@ const Dashboard = () => {
           <StatBox
             title="Unrealized Gains"
             subtitle=""
-            progress="0.75"
-            increase="+14%"
+            progress={unrealizedGain !== null ? (unrealizedGain / 100).toFixed(2) : 0}
+            increase={unrealizedGain !== null ? `${unrealizedGain.toFixed(2)}%` : "N/A"}
+            icon={<TimelineOutlinedIcon />}
+          />
+        </Box>
+
+        <Box
+          gridColumn="span 3"
+          backgroundColor={colors.primary[400]}
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <StatBox
+            title="Realized Gains"
+            subtitle=""
+            progress={realizedGain !== null ? (realizedGain / 100).toFixed(2) : 0}
+            increase={realizedGain !== null ? `${realizedGain.toFixed(2)}%` : "N/A"}
             icon={<TimelineOutlinedIcon />}
           />
         </Box>

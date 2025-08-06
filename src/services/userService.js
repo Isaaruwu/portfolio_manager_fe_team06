@@ -69,6 +69,14 @@ class UserService {
     return this.makeRequest(`/${id}/transactions`);
   }
 
+  async getUnrealizedGains(id) {
+    return this.makeRequest(`/${id}/unrealizedGains`);
+  }
+
+  async getRealizedGains(id) {
+    return this.makeRequest(`/${id}/realizedGains`);
+  }
+
 }
 
 const userService = new UserService();
