@@ -61,6 +61,10 @@ class UserService {
     return this.makeRequest(`/${id}/holdings`);
   }
 
+  async getAssetAllocation(id) {
+    return this.makeRequest(`/${id}/allocation`);
+  }
+
   async getHoldingsPrices(id) {
     return this.makeRequest(`/${id}/holdings/prices`);
   }

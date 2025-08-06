@@ -8,7 +8,6 @@ import Portfolio from "../../components/Portfolio";
 import StatBox from "../../components/StatBox";
 import Order from "../../components/Order";
 
-import ProgressCircle from "../../components/ProgressCircle";
 import userService from "../../services/userService";
 import { useState, useEffect } from "react";
 
@@ -187,7 +186,7 @@ const Dashboard = () => {
                 <Box color={colors.grey[100]}>{transaction.quantity}</Box>
                 {transaction.quantity < 0 ? (
                   <Box
-                    backgroundColor={colors.redAccent[500]}
+                    backgroundColor={colors.greenAccent[500]}
                     p="5px 10px"
                     borderRadius="4px"
                   >
@@ -195,7 +194,7 @@ const Dashboard = () => {
                   </Box> 
                 ) : (
                   <Box
-                    backgroundColor={colors.greenAccent[500]}
+                    backgroundColor={colors.redAccent[500]}
                     p="5px 10px"
                     borderRadius="4px"
                   >
