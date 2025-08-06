@@ -227,7 +227,7 @@ const Order = ({ open, onClose }) => {
     if (!validateTrade()) return;
 
     const tradeData = {
-      user_id: 1, // TODO: AUTH
+      user_id: 1,
       ticker: selectedSymbol,
       orderType: orderType,
       quantity: tradeType === 'sell' ? -Math.abs(quantity): parseFloat(quantity),
@@ -243,11 +243,17 @@ const Order = ({ open, onClose }) => {
       setTotal(0);
       
       if (onClose) {
-        onClose();
+        onClose(true);
       }
       
     } else {
       setError('Failed to send order. Please check connection and try again.');
+    }
+  };
+
+  const handleModalClose = () => {
+    if (onClose) {
+      onClose(false);
     }
   };
 
@@ -256,7 +262,7 @@ const Order = ({ open, onClose }) => {
         aria-labelledby="trade-results-modal"
         aria-describedby="trade-results-description"
         open={open}
-        onClose={onClose}
+        onClose={handleModalClose}
         closeAfterTransition 
         BackdropComponent={Backdrop}
         BackdropProps={{

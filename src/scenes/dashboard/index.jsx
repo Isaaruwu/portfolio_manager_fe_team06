@@ -1,4 +1,4 @@
-import { Box, Typography, useTheme, Button } from "@mui/material";
+import { Box, Typography, useTheme, Button, Snackbar, Alert } from "@mui/material";
 import { tokens } from "../../theme";
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import TimelineOutlinedIcon from "@mui/icons-material/TimelineOutlined";
@@ -8,23 +8,35 @@ import Portfolio from "../../components/Portfolio";
 import StatBox from "../../components/StatBox";
 import Order from "../../components/Order";
 
-import ProgressCircle from "../../components/ProgressCircle";
 import userService from "../../services/userService";
 import { useState, useEffect } from "react";
 
-const Dashboard = () => {
+const Dashboard = ({ refreshKey: externalRefreshKey = 0 }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [transactions, setTransactions] = useState([]);
+  const [unrealizedGain, setUnrealizedGain] = useState(null);
+  const [realizedGain, setRealizedGain] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [orderModalOpen, setOrderModalOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [balance, setBalance] = useState(null);
+  const [showOrderSuccess, setShowOrderSuccess] = useState(false);
 
-  const handleOrderClose = () => {
+  const handleOrderClose = (orderSubmitted = false) => {
     setOrderModalOpen(false);
     setRefreshKey(prev => prev + 1);
+    if (orderSubmitted) {
+      setShowOrderSuccess(true);
+    }
+  };
+
+  const handleSuccessClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setShowOrderSuccess(false);
   };
 
   useEffect(() => {
@@ -43,8 +55,30 @@ const Dashboard = () => {
       }
     };
 
+    const fetchUnrealizedGains = async () => {
+      try {
+        const gain = await userService.getUnrealizedGains(1); 
+        setUnrealizedGain(gain);
+      } catch (err) {
+        console.error("Failed to fetch unrealized gains:", err);
+        setUnrealizedGain(null);
+      }
+    };
+
+    const fetchRealizedGains = async () => {
+      try {
+        const gain = await userService.getRealizedGains(1); 
+        setRealizedGain(gain);
+      } catch (err) {
+        console.error("Failed to fetch realized gains:", err);
+        setRealizedGain(null);
+      }
+    };
+    fetchRealizedGains();
+  
+    fetchUnrealizedGains();
     fetchTransactions();
-  }, [refreshKey]);
+  }, [refreshKey, externalRefreshKey]);
 
   useEffect(() => {
     const fetchBalance = async () => {
@@ -57,7 +91,7 @@ const Dashboard = () => {
     };
 
     fetchBalance();
-  }, [refreshKey]);
+  }, [refreshKey, externalRefreshKey]);
 
 return (
   <Box m="20px">
@@ -65,31 +99,45 @@ return (
       <Header title="DASHBOARD" subtitle="Welcome to your dashboard" />
     </Box>
 
-    <Box
-      display="grid"
-      gridTemplateColumns="repeat(12, 1fr)"
-      gridAutoRows="140px"
-      gap="20px"
-    >
       <Box
-        gridColumn="span 3"
-        backgroundColor={colors.primary[400]}
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
+        display="grid"
+        gridTemplateColumns="repeat(12, 1fr)"
+        gap="20px"
+        mb="40px"
+        height="50px"
       >
-        <StatBox
-          title="Unrealized Gains"
-          subtitle=""
-          progress="0.75"
-          increase="+14%"
-          icon={<TimelineOutlinedIcon />}
-        />
-      </Box>
+        <Box
+          gridColumn="span 3"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <StatBox
+            title="Unrealized Gains"
+            subtitle=""
+            progress={unrealizedGain !== null ? (unrealizedGain / 100).toFixed(2) : 0}
+            increase={unrealizedGain !== null ? `${unrealizedGain.toFixed(2)}%` : "N/A"}
+            icon={<TimelineOutlinedIcon />}
+          />
+        </Box>
 
-      <Box
+        <Box
+          gridColumn="span 3"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <StatBox
+            title="Realized Gains"
+            subtitle=""
+            progress={realizedGain !== null ? (realizedGain / 100).toFixed(2) : 0}
+            increase={realizedGain !== null ? `${realizedGain.toFixed(2)}%` : "N/A"}
+            icon={<TimelineOutlinedIcon />}
+          />
+        </Box>
+        
+        <Box
         gridColumn="span 3"
-        backgroundColor={colors.primary[400]}
         display="flex"
         alignItems="center"
         justifyContent="center"
@@ -107,7 +155,7 @@ return (
       </Box>
 
         <Box
-          gridColumn="span 6"
+          gridColumn="span 3"
           display="flex"
           alignItems="center"
           justifyContent="flex-end"
@@ -133,37 +181,26 @@ return (
             Place Order
           </Button>
         </Box>
+      </Box>
 
-        {/* ROW 2 */}
+      <Box
+        display="grid"
+        gridTemplateColumns="repeat(12, 1fr)"
+        gridAutoRows="140px"
+        gap="20px"
+      >
         <Box
           gridColumn="span 8"
-          gridRow="span 4"
+          gridRow="span 5"
           backgroundColor={colors.primary[400]}
         >
-          <Box
-            mt="25px"
-            p="0 30px"
-            display="flex "
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Box>
-              <Typography
-                variant="h3"
-                fontWeight="bold"
-                color={colors.grey[100]}
-              >
-                Holdings
-              </Typography>
-            </Box>
-          </Box>
           <Box m="20px 0 0 0">
             <Portfolio key={refreshKey} />
           </Box>
         </Box>
         <Box
           gridColumn="span 4"
-          gridRow="span 3"
+          gridRow="span 5"
           backgroundColor={colors.primary[400]}
           overflow="auto"
         >
@@ -212,7 +249,7 @@ return (
                 <Box color={colors.grey[100]}>{transaction.quantity}</Box>
                 {transaction.quantity < 0 ? (
                   <Box
-                    backgroundColor={colors.redAccent[500]}
+                    backgroundColor={colors.greenAccent[500]}
                     p="5px 10px"
                     borderRadius="4px"
                   >
@@ -220,7 +257,7 @@ return (
                   </Box> 
                 ) : (
                   <Box
-                    backgroundColor={colors.greenAccent[500]}
+                    backgroundColor={colors.redAccent[500]}
                     p="5px 10px"
                     borderRadius="4px"
                   >
@@ -231,34 +268,6 @@ return (
             ))
           )}
         </Box>
-
-
-        <Box
-          gridColumn="span 4"
-          gridRow="span 2"
-          backgroundColor={colors.primary[400]}
-          p="30px"
-        >
-          <Typography variant="h5" fontWeight="600">
-            Campaign
-          </Typography>
-          <Box
-            display="flex"
-            flexDirection="column"
-            alignItems="center"
-            mt="25px"
-          >
-            <ProgressCircle size="125" />
-            <Typography
-              variant="h5"
-              color={colors.greenAccent[500]}
-              sx={{ mt: "15px" }}
-            >
-              $48,352 revenue generated
-            </Typography>
-            <Typography>Includes extra misc expenditures and costs</Typography>
-          </Box>
-        </Box>
       </Box>
 
       {orderModalOpen && (
@@ -267,6 +276,32 @@ return (
           onClose={handleOrderClose}
         />
       )}
+
+      <Snackbar
+        open={showOrderSuccess}
+        autoHideDuration={4000}
+        onClose={handleSuccessClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ zIndex: 9999 }}
+      >
+        <Alert 
+          onClose={handleSuccessClose} 
+          severity="success" 
+          sx={{ 
+            width: '100%',
+            backgroundColor: colors.greenAccent[600],
+            color: colors.grey[100],
+            '& .MuiAlert-icon': {
+              color: colors.grey[100]
+            },
+            '& .MuiAlert-action': {
+              color: colors.grey[100]
+            }
+          }}
+        >
+          Order placed successfully!
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

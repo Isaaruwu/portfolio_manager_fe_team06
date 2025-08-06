@@ -1,14 +1,40 @@
 import { ResponsivePie } from "@nivo/pie";
 import { tokens } from "../theme";
 import { useTheme } from "@mui/material";
-import { mockPieData as data } from "../data/mockData";
+
+import userService from "../services/userService";
+
+import { useState, useEffect } from "react";
+
 
 const PieChart = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+
+  const [allocation, setAllocation] = useState([]);
+
+  useEffect(() => {
+      const fetchAllocation = async () => {
+        try {
+          const data = await userService.getAssetAllocation(1);
+          const dataWithColors = Object.entries(data).map(([key, value]) => ({
+            id: key,
+            label: key,
+            value: value,
+            color: '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')
+          }));
+          setAllocation(dataWithColors);
+        } catch (err) {
+          console.error('Failed to fetch stock data:', err);
+        }
+      };
+  
+      fetchAllocation();
+    }, []);
+
   return (
     <ResponsivePie
-      data={data}
+      data={allocation}
       theme={{
         axis: {
           domain: {
@@ -36,6 +62,11 @@ const PieChart = () => {
             fill: colors.grey[100],
           },
         },
+        labels: {
+        text: {
+          fontSize: 23,
+        },
+      },
       }}
       margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
       innerRadius={0.5}
@@ -50,7 +81,8 @@ const PieChart = () => {
       arcLinkLabelsTextColor={colors.grey[100]}
       arcLinkLabelsThickness={2}
       arcLinkLabelsColor={{ from: "color" }}
-      enableArcLabels={false}
+      enableArcLabels={true}
+      arcLabel={e=>`${e.value} %`}
       arcLabelsRadiusOffset={0.4}
       arcLabelsSkipAngle={7}
       arcLabelsTextColor={{

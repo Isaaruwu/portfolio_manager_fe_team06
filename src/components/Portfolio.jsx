@@ -3,6 +3,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../theme";
 import { useState, useEffect } from "react";
 import userService from "../services/userService";
+import dataService from "../services/dataService";
 import RefreshIcon from "@mui/icons-material/Refresh";
 
 const Portfolio = () => {
@@ -13,14 +14,29 @@ const Portfolio = () => {
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
 
+
   const fetchHoldings = async () => {
     try {
       const data = await userService.getHoldings(1);
-      const currentPrices = await userService.getHoldingsPrices(1);
-      const holdingsWithPrices = data.map(holding => ({
-          ...holding,
-          currentPrice: currentPrices[holding.ticker],
-      }));
+      
+      const holdingsWithPrices = await Promise.all(
+        data.map(async (holding) => {
+          try {
+            const priceData = await dataService.getSymbolData(holding.ticker);
+            return {
+              ...holding,
+              currentPrice: priceData.Close
+            };
+          } catch (error) {
+            console.error(`Failed to fetch price for ${holding.ticker}:`, error);
+            return {
+              ...holding,
+              currentPrice: 0 
+            };
+          }
+        })
+      );
+      
       setHoldings(holdingsWithPrices);
       setError(null);
       setLastUpdated(new Date());
@@ -45,8 +61,8 @@ const Portfolio = () => {
     
     initialLoad();
 
-    const interval = setInterval(() => {
-      fetchHoldings();
+    const interval = setInterval(async () => {
+      await fetchHoldings();
     }, 10000);
 
     return () => clearInterval(interval);
@@ -186,7 +202,7 @@ const Portfolio = () => {
             </Typography>
           </Box>
         ) : (
-            <Box height="500px">
+            <Box height="680px">
                 <DataGrid 
                   rows={holdings} 
                   columns={columns}

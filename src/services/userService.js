@@ -53,6 +53,13 @@ class UserService {
     });
   }
 
+  async deposit(id, amount) {
+    return this.makeRequest(`/${id}/deposit`, {
+      method: 'POST',
+      body: JSON.stringify({'ammount': amount}),
+    });
+  }
+
   async getBalance(id) {
     return this.makeRequest(`/${id}/balance`);
   }
@@ -61,12 +68,24 @@ class UserService {
     return this.makeRequest(`/${id}/holdings`);
   }
 
+  async getAssetAllocation(id) {
+    return this.makeRequest(`/${id}/allocation`);
+  }
+
   async getHoldingsPrices(id) {
     return this.makeRequest(`/${id}/holdings/prices`);
   }
 
   async getTransactions(id) {
     return this.makeRequest(`/${id}/transactions`);
+  }
+
+  async getUnrealizedGains(id) {
+    return this.makeRequest(`/${id}/unrealizedGains`);
+  }
+
+  async getRealizedGains(id) {
+    return this.makeRequest(`/${id}/realizedGains`);
   }
 
 }
