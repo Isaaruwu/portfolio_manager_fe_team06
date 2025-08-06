@@ -23,6 +23,7 @@ const Portfolio = () => {
         data.map(async (holding) => {
           try {
             const priceData = await dataService.getSymbolData(holding.ticker);
+            console.log(data);
             return {
               ...holding,
               currentPrice: priceData.Close
@@ -36,6 +37,7 @@ const Portfolio = () => {
           }
         })
       );
+      console.log(holdingsWithPrices)
       
       setHoldings(holdingsWithPrices);
       setError(null);
@@ -82,6 +84,12 @@ const Portfolio = () => {
       minWidth: 200,
     },
     {
+      field: "asset_class",
+      headerName: "Asset Class",
+      flex: 1,
+      minWidth: 200,
+    },
+    {
       field: "quantity",
       headerName: "Shares",
       type: "number",
@@ -104,6 +112,41 @@ const Portfolio = () => {
       width: 120,
       type: "number",
       valueFormatter: ({ value }) => `$${value?.toFixed(2)}`,
+      headerAlign: "left",
+      align: "left",
+    },
+    {
+      field: "pnl_dollar",
+      headerName: "P&L ($)",
+      width: 120,
+      type: "number",
+      valueGetter: ({ row }) => {
+        if (row.avg_price && row.currentPrice && row.quantity) {
+          return (row.currentPrice - row.avg_price) * row.quantity;
+        }
+        return 0;
+      },
+      valueFormatter: ({ value }) => {
+        const color = value >= 0 ? '#4cceac' : '#f44336';
+        return `${value >= 0 ? '+' : ''}$${value?.toFixed(2)}`;
+      },
+      cellClassName: ({ value }) => value >= 0 ? "pnl-positive" : "pnl-negative",
+      headerAlign: "left",
+      align: "left",
+    },
+    {
+      field: "pnl_percent",
+      headerName: "P&L (%)",
+      width: 120,
+      type: "number",
+      valueGetter: ({ row }) => {
+        if (row.avg_price && row.currentPrice) {
+          return ((row.currentPrice - row.avg_price) / row.avg_price) * 100;
+        }
+        return 0;
+      },
+      valueFormatter: ({ value }) => `${value >= 0 ? '+' : ''}${value?.toFixed(2)}%`,
+      cellClassName: ({ value }) => value >= 0 ? "pnl-positive" : "pnl-negative",
       headerAlign: "left",
       align: "left",
     },
@@ -159,6 +202,14 @@ const Portfolio = () => {
           },
           "& .symbol-column--cell": {
             color: colors.greenAccent[300],
+            fontWeight: "bold",
+          },
+          "& .pnl-positive": {
+            color: colors.greenAccent[300],
+            fontWeight: "bold",
+          },
+          "& .pnl-negative": {
+            color: colors.redAccent[500],
             fontWeight: "bold",
           },
           "& .MuiDataGrid-columnHeaders": {
