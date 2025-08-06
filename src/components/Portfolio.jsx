@@ -202,7 +202,7 @@ const Portfolio = () => {
             </Typography>
           </Box>
         ) : (
-            <Box height="500px">
+            <Box height="680px">
                 <DataGrid 
                   rows={holdings} 
                   columns={columns}

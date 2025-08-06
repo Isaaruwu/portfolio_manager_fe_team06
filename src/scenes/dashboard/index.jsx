@@ -54,12 +54,12 @@ const Dashboard = () => {
       <Box
         display="grid"
         gridTemplateColumns="repeat(12, 1fr)"
-        gridAutoRows="140px"
         gap="20px"
+        mb="40px"
+        height="50px"
       >
         <Box
           gridColumn="span 3"
-          backgroundColor={colors.primary[400]}
           display="flex"
           alignItems="center"
           justifyContent="center"
@@ -75,7 +75,6 @@ const Dashboard = () => {
         
         <Box
           gridColumn="span 3"
-          backgroundColor={colors.primary[400]}
           display="flex"
           alignItems="center"
           justifyContent="center"
@@ -120,37 +119,26 @@ const Dashboard = () => {
             Place Order
           </Button>
         </Box>
+      </Box>
 
-        {/* ROW 2 */}
+      <Box
+        display="grid"
+        gridTemplateColumns="repeat(12, 1fr)"
+        gridAutoRows="140px"
+        gap="20px"
+      >
         <Box
           gridColumn="span 8"
-          gridRow="span 4"
+          gridRow="span 5"
           backgroundColor={colors.primary[400]}
         >
-          <Box
-            mt="25px"
-            p="0 30px"
-            display="flex "
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Box>
-              <Typography
-                variant="h3"
-                fontWeight="bold"
-                color={colors.grey[100]}
-              >
-                Holdings
-              </Typography>
-            </Box>
-          </Box>
           <Box m="20px 0 0 0">
             <Portfolio key={refreshKey} />
           </Box>
         </Box>
         <Box
           gridColumn="span 4"
-          gridRow="span 3"
+          gridRow="span 5"
           backgroundColor={colors.primary[400]}
           overflow="auto"
         >
@@ -217,34 +205,6 @@ const Dashboard = () => {
               </Box>
             ))
           )}
-        </Box>
-
-
-        <Box
-          gridColumn="span 4"
-          gridRow="span 2"
-          backgroundColor={colors.primary[400]}
-          p="30px"
-        >
-          <Typography variant="h5" fontWeight="600">
-            Campaign
-          </Typography>
-          <Box
-            display="flex"
-            flexDirection="column"
-            alignItems="center"
-            mt="25px"
-          >
-            <ProgressCircle size="125" />
-            <Typography
-              variant="h5"
-              color={colors.greenAccent[500]}
-              sx={{ mt: "15px" }}
-            >
-              $48,352 revenue generated
-            </Typography>
-            <Typography>Includes extra misc expenditures and costs</Typography>
-          </Box>
         </Box>
       </Box>
 
