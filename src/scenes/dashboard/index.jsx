@@ -109,7 +109,6 @@ const Dashboard = () => {
 
         <Box
           gridColumn="span 3"
-          backgroundColor={colors.primary[400]}
           display="flex"
           alignItems="center"
           justifyContent="center"
@@ -143,7 +142,7 @@ const Dashboard = () => {
         </Box>
 
         <Box
-          gridColumn="span 6"
+          gridColumn="span 3"
           display="flex"
           alignItems="center"
           justifyContent="flex-end"
