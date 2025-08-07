@@ -23,7 +23,6 @@ const Portfolio = () => {
         data.map(async (holding) => {
           try {
             const priceData = await dataService.getSymbolData(holding.ticker);
-            console.log(data);
             return {
               ...holding,
               currentPrice: priceData.Close
@@ -36,9 +35,7 @@ const Portfolio = () => {
             };
           }
         })
-      );
-      console.log(holdingsWithPrices)
-      
+      );      
       setHoldings(holdingsWithPrices);
       setError(null);
       setLastUpdated(new Date());
@@ -74,33 +71,33 @@ const Portfolio = () => {
     { 
       field: "ticker", 
       headerName: "Symbol",
-      width: 100,
+      width: 80,
       cellClassName: "symbol-column--cell",
     },
     {
       field: "name",
       headerName: "Company Name",
-      flex: 1,
-      minWidth: 200,
+      flex: 2,
+      minWidth: 150,
     },
     {
       field: "asset_class",
       headerName: "Asset Class",
       flex: 1,
-      minWidth: 200,
+      minWidth: 120,
     },
     {
       field: "quantity",
       headerName: "Shares",
       type: "number",
-      width: 100,
+      width: 80,
       headerAlign: "left",
       align: "left",
     },
     {
       field: "avg_price",
-      headerName: "Average Price",
-      width: 130,
+      headerName: "Avg Price",
+      width: 100,
       type: "number",
       valueFormatter: ({ value }) => `$${value?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       headerAlign: "left",
@@ -108,8 +105,8 @@ const Portfolio = () => {
     },
     {
       field: "currentPrice",
-      headerName: "Current Price",
-      width: 120,
+      headerName: "Current",
+      width: 90,
       type: "number",
       valueFormatter: ({ value }) => `$${value?.toFixed(2)}`,
       headerAlign: "left",
@@ -118,7 +115,7 @@ const Portfolio = () => {
     {
       field: "pnl_dollar",
       headerName: "P&L ($)",
-      width: 120,
+      width: 100,
       type: "number",
       valueGetter: ({ row }) => {
         if (row.avg_price && row.currentPrice && row.quantity) {
@@ -137,7 +134,7 @@ const Portfolio = () => {
     {
       field: "pnl_percent",
       headerName: "P&L (%)",
-      width: 120,
+      width: 90,
       type: "number",
       valueGetter: ({ row }) => {
         if (row.avg_price && row.currentPrice) {
@@ -196,6 +193,7 @@ const Portfolio = () => {
         sx={{
           "& .MuiDataGrid-root": {
             border: "none",
+            overflow: "hidden",
           },
           "& .MuiDataGrid-cell": {
             borderBottom: "none",
@@ -218,6 +216,7 @@ const Portfolio = () => {
           },
           "& .MuiDataGrid-virtualScroller": {
             backgroundColor: colors.primary[400],
+            overflowX: "hidden",
           },
           "& .MuiDataGrid-footerContainer": {
             borderTop: "none",
@@ -260,6 +259,8 @@ const Portfolio = () => {
                   pageSize={10}
                   rowsPerPageOptions={[5, 10, 20]}
                   disableSelectionOnClick
+                  disableColumnResize
+                  autoHeight={false}
                 />
             </Box>
         )}

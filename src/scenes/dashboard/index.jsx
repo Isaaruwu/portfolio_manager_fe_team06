@@ -58,7 +58,7 @@ const Dashboard = ({ refreshKey: externalRefreshKey = 0 }) => {
     const fetchUnrealizedGains = async () => {
       try {
         const gain = await userService.getUnrealizedGains(1); 
-        if (gain.length > 0) {setUnrealizedGain(gain);}
+        setUnrealizedGain(gain);
       } catch (err) {
         console.error("Failed to fetch unrealized gains:", err);
         setUnrealizedGain(null);
@@ -68,15 +68,13 @@ const Dashboard = ({ refreshKey: externalRefreshKey = 0 }) => {
     const fetchRealizedGains = async () => {
       try {
         const gain = await userService.getRealizedGains(1);
-        if (gain.length > 0) {setRealizedGain(gain);}
-        console.log('rel', gain);
+        setRealizedGain(gain);
       } catch (err) {
         console.error("Failed to fetch realized gains:", err);
         setRealizedGain(null);
       }
     };
     fetchRealizedGains();
-  
     fetchUnrealizedGains();
     fetchTransactions();
   }, [refreshKey, externalRefreshKey]);
@@ -108,36 +106,6 @@ return (
         height="50px"
       >
         <Box
-          gridColumn="span 3"
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-        >
-          <StatBox
-            title="Unrealized Gains"
-            subtitle=""
-            progress={unrealizedGain !== null? (unrealizedGain / 100).toFixed(2) : 0}
-            increase={unrealizedGain !== null? `${unrealizedGain.toFixed(2)}%` : "N/A"}
-            icon={<TimelineOutlinedIcon />}
-          />
-        </Box>
-
-        <Box
-          gridColumn="span 3"
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-        >
-          <StatBox
-            title="Realized Gains"
-            subtitle=""
-            progress={realizedGain !== null ? (realizedGain / 100).toFixed(2) : 0}
-            increase={realizedGain !== null ? `${realizedGain.toFixed(2)}%` : "N/A"}
-            icon={<TimelineOutlinedIcon />}
-          />
-        </Box>
-        
-        <Box
         gridColumn="span 3"
         display="flex"
         alignItems="center"
@@ -154,6 +122,34 @@ return (
           }
         />
       </Box>
+
+        <Box
+          gridColumn="span 3"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <StatBox
+            title="Unrealized Gains"
+            subtitle=""
+            increase={unrealizedGain !== null? unrealizedGain.toFixed(3) : "N/A"}
+            icon={<TimelineOutlinedIcon />}
+          />
+        </Box>
+
+        <Box
+          gridColumn="span 3"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <StatBox
+            title="Realized Gains"
+            subtitle=""
+            increase={realizedGain !== null ? realizedGain.toFixed(3) : "N/A"}
+            icon={<TimelineOutlinedIcon />}
+          />
+        </Box>
 
         <Box
           gridColumn="span 3"
