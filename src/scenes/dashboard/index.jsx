@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import TimelineOutlinedIcon from "@mui/icons-material/TimelineOutlined";
-import { Box, Typography, useTheme, Button, Snackbar, Alert } from "@mui/material";
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import { Box, Typography, useTheme, Button, Snackbar, Alert, Tooltip } from "@mui/material";
 
 import { tokens } from "../../theme";
 import Order from "../../components/Order";
@@ -16,8 +17,14 @@ const Dashboard = ({ refreshKey: externalRefreshKey = 0 }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [transactions, setTransactions] = useState([]);
-  const [unrealizedGain, setUnrealizedGain] = useState(null);
-  const [realizedGain, setRealizedGain] = useState(null);
+  const [unrealizedGain, setUnrealizedGain] = useState({
+    percentage: 0,
+    value: 0
+  });
+  const [realizedGain, setRealizedGain] = useState({
+    percentage: 0,
+    value: 0
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [orderModalOpen, setOrderModalOpen] = useState(false);
@@ -59,7 +66,7 @@ const Dashboard = ({ refreshKey: externalRefreshKey = 0 }) => {
     const fetchUnrealizedGains = async () => {
       try {
         const gain = await userService.getUnrealizedGains(1); 
-        setUnrealizedGain(gain);
+        setUnrealizedGain({percentage: gain.percentage, value: gain.value});
       } catch (err) {
         console.error("Failed to fetch unrealized gains:", err);
         setUnrealizedGain(null);
@@ -69,7 +76,7 @@ const Dashboard = ({ refreshKey: externalRefreshKey = 0 }) => {
     const fetchRealizedGains = async () => {
       try {
         const gain = await userService.getRealizedGains(1);
-        setRealizedGain(gain);
+        setRealizedGain({percentage: gain.percentage, value: gain.value});
       } catch (err) {
         console.error("Failed to fetch realized gains:", err);
         setRealizedGain(null);
@@ -102,58 +109,96 @@ return (
       <Box
         display="grid"
         gridTemplateColumns="repeat(12, 1fr)"
-        gap="20px"
+        gap="10px"
         mb="40px"
         height="50px"
       >
         <Box
-        gridColumn="span 3"
+        gridColumn="span 2"
         display="flex"
         alignItems="center"
         justifyContent="center"
       >
-        <StatBox
-          title={balance != null ? `$${balance.toLocaleString()}` : "N/A"}
-          subtitle="User Balance"
-          progress="0.80"
-          icon={
-            <AccountBalanceIcon
-              sx={{ color: colors.greenAccent[600], fontSize: "26px" }}
-            />
-          }
-        />
+        <Box width="100%" textAlign="center">
+          <Typography variant="h5" color={colors.grey[100]} mb={1}>
+            Cash Balance
+          </Typography>
+          <StatBox
+            title={balance != null ? `$ ${balance.toLocaleString()}` : "N/A"}
+            increase=""
+            icon={
+              <AccountBalanceIcon
+                sx={{ color: colors.greenAccent[600], fontSize: "26px" }}
+              />
+            }
+          />
+        </Box>
       </Box>
 
         <Box
-          gridColumn="span 3"
+          gridColumn="span 2"
           display="flex"
           alignItems="center"
           justifyContent="center"
         >
-          <StatBox
-            title="Unrealized Gains"
-            subtitle=""
-            increase={unrealizedGain !== null? unrealizedGain.toFixed(3) : "N/A"}
-            icon={<TimelineOutlinedIcon />}
-          />
+          <Box width="100%" textAlign="center">
+            <Typography variant="h5" color={colors.grey[100]} mb={1}>
+              Unrealized Gains
+            </Typography>
+            <StatBox
+              title={unrealizedGain !== null ? `$${unrealizedGain.value.toLocaleString()}` : "N/A"}
+              increase={unrealizedGain !== null ? unrealizedGain.percentage.toFixed(2) : "N/A"}
+              icon={<TimelineOutlinedIcon sx={{ color: colors.greenAccent[600], fontSize: "26px" }} />}
+            />
+          </Box>
         </Box>
 
         <Box
-          gridColumn="span 3"
+          gridColumn="span 2"
           display="flex"
           alignItems="center"
           justifyContent="center"
         >
-          <StatBox
-            title="Realized Gains"
-            subtitle=""
-            increase={realizedGain !== null ? realizedGain.toFixed(3) : "N/A"}
-            icon={<TimelineOutlinedIcon />}
-          />
+          <Box width="100%" textAlign="center">
+            <Box display="flex" alignItems="center" justifyContent="center" gap="5px" mb={1}>
+              <Typography variant="h5" color={colors.grey[100]}>
+                Realized Gains
+              </Typography>
+              <Tooltip 
+                title="(FIFO) Assumes that the first shares purchased are the first ones sold."
+                arrow
+                placement="top"
+                componentsProps={{
+                  tooltip: {
+                    sx: {
+                      fontSize: '14px',
+                      maxWidth: '300px'
+                    }
+                  }
+                }}
+              >
+                <HelpOutlineIcon 
+                  sx={{ 
+                    color: colors.grey[300], 
+                    fontSize: "16px",
+                    cursor: "pointer",
+                    "&:hover": {
+                      color: colors.greenAccent[500]
+                    }
+                  }} 
+                />
+              </Tooltip>
+            </Box>
+            <StatBox
+              title={realizedGain !== null ? `$${realizedGain.value.toLocaleString()}` : "N/A"}
+              increase={realizedGain !== null ? realizedGain.percentage.toFixed(2) : "N/A"}
+              icon={<TimelineOutlinedIcon sx={{ color: colors.greenAccent[600], fontSize: "26px" }} />}
+            />
+          </Box>
         </Box>
 
         <Box
-          gridColumn="span 3"
+          gridColumn="span 6"
           display="flex"
           alignItems="center"
           justifyContent="flex-end"

@@ -8,11 +8,12 @@ const StatBox = ({ title, icon, increase }) => {
   const colors = tokens(theme.palette.mode);
 
   return (
-    <Box width="100%" m="0 30px">
-      <Box display="flex" justifyContent="space-between">
+    <Box width="100%">
+      <Box display="flex" justifyContent="center" alignItems="center" gap="35px">
         <Box>
           {icon}
         </Box>
+        <Box display="flex" alignItems="center" gap="10px">
           <Typography
             variant="h4"
             fontWeight="bold"
@@ -20,14 +21,13 @@ const StatBox = ({ title, icon, increase }) => {
           >
             {title}
           </Typography>
-        <Box>
           <Typography
-          variant="h4"
-          fontStyle="italic"
-          sx={{ color: increase < 0 ? colors.redAccent[500] : colors.greenAccent[600] }}
-        >
-          {increase} {increase ? '%' : ''}
-        </Typography>
+            variant="h5"
+            fontStyle="italic"
+            sx={{ color: increase < 0 ? colors.redAccent[500] : colors.greenAccent[600] }}
+          >
+            {increase} {increase ? '%' : ''}
+          </Typography>
         </Box>
       </Box>
     </Box>
