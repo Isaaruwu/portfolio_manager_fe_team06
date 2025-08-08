@@ -24,6 +24,7 @@
     "@testing-library/react": "^13.3.0",
     "@testing-library/user-event": "^13.5.0",
     "chart.js": "^3.9.1",
+    "dotenv": "^17.2.1",
     "formik": "^2.2.9",
     "react": "^18.2.0",
     "react-chartjs-2": "^4.3.1",
@@ -36,7 +37,7 @@
     "yup": "^0.32.11"
   },
   "scripts": {
-    "start": "PORT=3000 react-scripts start",
+    "start": "cross-env PORT=3000 react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -58,5 +59,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "cross-env": "^10.0.0"
   }
 }
