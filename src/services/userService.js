@@ -88,6 +88,10 @@ class UserService {
     return this.makeRequest(`/${id}/realizedGains`);
   }
 
+  async getGrowth(id) {
+    return this.makeRequest(`/${id}/growth`);
+  }
+
 }
 
 const userService = new UserService();

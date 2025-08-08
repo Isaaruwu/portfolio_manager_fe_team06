@@ -1,39 +1,40 @@
-import { ResponsivePie } from "@nivo/pie";
 import { tokens } from "../theme";
 import { useTheme } from "@mui/material";
+import { ResponsivePie } from "@nivo/pie";
 import { useState, useEffect } from "react";
 
 import userService from "../services/userService";
 
 
-const PieChart = () => {
+const AssetPieChart = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
-  const [allocation, setAllocation] = useState([]);
+  const [holdings, setHoldings] = useState([]);
 
   useEffect(() => {
-      const fetchAllocation = async () => {
+      const fetchHoldings = async () => {
         try {
-          const data = await userService.getAssetAllocation(1);
-          const dataWithColors = Object.entries(data).map(([key, value]) => ({
-            id: key,
-            label: key,
-            value: value,
+          const data = await userService.getHoldings(1);
+          const total_value = data.reduce((acc, holding) => acc + (holding.quantity * holding.avg_price), 0);
+          const holdingsData = data.map((holding, index) => ({
+            id: holding.ticker,
+            label: holding.ticker,
+            value: parseFloat(((holding.quantity * holding.avg_price)/total_value * 100).toFixed(2)),
             color: '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')
           }));
-          setAllocation(dataWithColors);
+          setHoldings(holdingsData);
         } catch (err) {
-          console.error('Failed to fetch stock data:', err);
+          console.error('Failed to fetch holdings data:', err);
         }
       };
   
-      fetchAllocation();
+      fetchHoldings();
     }, []);
 
   return (
     <ResponsivePie
-      data={allocation}
+      data={holdings}
       theme={{
         axis: {
           domain: {
@@ -86,7 +87,7 @@ const PieChart = () => {
       arcLabelsSkipAngle={7}
       arcLabelsTextColor={{
         from: "color",
-        modifiers: [["darker", 4]],
+        modifiers: [["darker", 2]],
       }}
       defs={[
         {
@@ -137,4 +138,4 @@ const PieChart = () => {
   );
 };
 
-export default PieChart;
+export default AssetPieChart;

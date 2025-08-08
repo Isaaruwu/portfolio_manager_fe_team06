@@ -1,15 +1,16 @@
-import { Box, Typography, useTheme, Button, Snackbar, Alert } from "@mui/material";
-import { tokens } from "../../theme";
+import { useState, useEffect } from "react";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import TimelineOutlinedIcon from "@mui/icons-material/TimelineOutlined";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import Header from "../../components/Header";
-import Portfolio from "../../components/Portfolio";
-import StatBox from "../../components/StatBox";
-import Order from "../../components/Order";
+import { Box, Typography, useTheme, Button, Snackbar, Alert } from "@mui/material";
 
+import { tokens } from "../../theme";
+import Order from "../../components/Order";
+import Header from "../../components/Header";
+import StatBox from "../../components/StatBox";
+import Portfolio from "../../components/Portfolio";
 import userService from "../../services/userService";
-import { useState, useEffect } from "react";
+
 
 const Dashboard = ({ refreshKey: externalRefreshKey = 0 }) => {
   const theme = useTheme();

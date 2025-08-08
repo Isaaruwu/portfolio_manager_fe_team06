@@ -1,15 +1,92 @@
 import { ResponsiveLine } from "@nivo/line";
-import { useTheme } from "@mui/material";
-import { tokens } from "../theme";
-import { mockLineData as data } from "../data/mockData";
+import { useState, useEffect } from "react";
+import { useTheme, Box, Typography } from "@mui/material";
 
-const LineChart = ({ isCustomLineColors = false, isDashboard = false }) => {
+import { tokens } from "../theme";
+import userService from "../services/userService";
+
+
+const LineChart = ({ isDashboard = false }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
+  const [growthData, setGrowthData] = useState([]);
+  const [portfolioStats, setPortfolioStats] = useState({
+    currentValue: 0,
+    lastUpdate: '',
+    investedAmount: 0,
+    cashBalance: 0
+  });
+  
+  useEffect(() => {
+      const fetchGrowthData = async () => {
+        try {
+          const data = await userService.getGrowth(1);
+          const formatted = data.map(item => ({
+            x: new Date(item.date).toISOString().slice(0,10).replace(/-/g,'/'),
+            y: item.portfolio_value + item.cash_balance
+          }));
+          if (data.length > 0) {
+            const latestData = data[data.length - 1];
+            setPortfolioStats({
+              currentValue: latestData.portfolio_value + latestData.cash_balance,
+              lastUpdate: new Date(latestData.date).toLocaleDateString(),
+              investedAmount: latestData.portfolio_value,
+              cashBalance: latestData.cash_balance
+            });
+          }
+          
+          setGrowthData([{
+            id: "Growth",
+            color: tokens("dark").greenAccent[500],
+            data: formatted
+          }]);
+        } catch (err) {
+          console.error('Failed to fetch stock data:', err);
+        }
+      };
+  
+      fetchGrowthData();
+    }, []);
+  
+
   return (
-    <ResponsiveLine
-      data={data}
+    <Box>
+      <Box mb={2}>
+        <Typography 
+          variant={"h2"} 
+          fontWeight="bold" 
+          color={colors.greenAccent[400]}
+          mb={1}
+        >
+          ${portfolioStats.currentValue.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          })}
+        </Typography>
+        
+        <Box display="flex" gap={3} flexWrap="wrap">
+          <Typography variant="body2" color={colors.grey[200]}>
+            Last Updated: {portfolioStats.lastUpdate}
+          </Typography>
+          <Typography variant="body2" color={colors.grey[200]}>
+            Invested: ${portfolioStats.investedAmount.toLocaleString('en-US', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            })}
+          </Typography>
+          <Typography variant="body2" color={colors.grey[200]}>
+            Cash Balance: ${portfolioStats.cashBalance.toLocaleString('en-US', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            })}
+          </Typography>
+        </Box>
+      </Box>
+
+      <Box height={"700px"}>
+        <ResponsiveLine
+        data={growthData}
       theme={{
         axis: {
           domain: {
@@ -43,12 +120,12 @@ const LineChart = ({ isCustomLineColors = false, isDashboard = false }) => {
           },
         },
       }}
-      colors={isDashboard ? { datum: "color" } : { scheme: "nivo" }} // added
-      margin={{ top: 50, right: 110, bottom: 50, left: 60 }}
+      colors={{ scheme: 'accent' }}
+      margin={{ top: 50, right: 110, bottom: 100, left: 100 }}
       xScale={{ type: "point" }}
       yScale={{
         type: "linear",
-        min: "auto",
+        min: "100",
         max: "auto",
         stacked: true,
         reverse: false,
@@ -56,24 +133,26 @@ const LineChart = ({ isCustomLineColors = false, isDashboard = false }) => {
       yFormat=" >-.2f"
       curve="catmullRom"
       axisTop={null}
+      enableArea={true}
+      areaBaselineValue={100}
       axisRight={null}
       axisBottom={{
         orient: "bottom",
         tickSize: 0,
-        tickPadding: 5,
-        tickRotation: 0,
-        legend: isDashboard ? undefined : "transportation", // added
-        legendOffset: 36,
+        tickPadding: 10,
+        tickRotation: -60,
+        legend: "Date",
+        legendOffset: 80,
         legendPosition: "middle",
       }}
       axisLeft={{
         orient: "left",
-        tickValues: 5, // added
+        tickValues: 5,
         tickSize: 3,
         tickPadding: 5,
         tickRotation: 0,
-        legend: isDashboard ? undefined : "count", // added
-        legendOffset: -40,
+        legend: isDashboard ? undefined : "Value $USDT",
+        legendOffset: -80,
         legendPosition: "middle",
       }}
       enableGridX={false}
@@ -111,6 +190,8 @@ const LineChart = ({ isCustomLineColors = false, isDashboard = false }) => {
         },
       ]}
     />
+      </Box>
+    </Box>
   );
 };
 

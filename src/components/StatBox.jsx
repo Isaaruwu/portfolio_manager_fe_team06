@@ -1,7 +1,9 @@
 import { Box, Typography, useTheme } from "@mui/material";
+
 import { tokens } from "../theme";
 
-const StatBox = ({ title, subtitle, icon, progress, increase }) => {
+
+const StatBox = ({ title, icon, increase }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 

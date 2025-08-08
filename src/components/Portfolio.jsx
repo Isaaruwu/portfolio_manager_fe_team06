@@ -1,7 +1,8 @@
-import { Box, Typography, useTheme, IconButton, Tooltip } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
-import { tokens } from "../theme";
 import { useState, useEffect } from "react";
+import { DataGrid } from "@mui/x-data-grid";
+import { Box, Typography, useTheme, IconButton, Tooltip } from "@mui/material";
+
+import { tokens } from "../theme";
 import userService from "../services/userService";
 import dataService from "../services/dataService";
 import RefreshIcon from "@mui/icons-material/Refresh";
