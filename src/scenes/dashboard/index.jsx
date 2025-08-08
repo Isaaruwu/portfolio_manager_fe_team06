@@ -142,9 +142,35 @@ return (
           justifyContent="center"
         >
           <Box width="100%" textAlign="center">
-            <Typography variant="h5" color={colors.grey[100]} mb={1}>
-              Unrealized Gains
-            </Typography>
+          <Box display="flex" alignItems="center" justifyContent="center" gap="5px" mb={1}>
+              <Typography variant="h5" color={colors.grey[100]}>
+                Unrealized Gains
+              </Typography>
+              <Tooltip 
+                title="(FIFO) Assumes that the first shares purchased are the first ones sold."
+                arrow
+                placement="top"
+                componentsProps={{
+                  tooltip: {
+                    sx: {
+                      fontSize: '14px',
+                      maxWidth: '300px'
+                    }
+                  }
+                }}
+              >
+                <HelpOutlineIcon 
+                  sx={{ 
+                    color: colors.grey[300], 
+                    fontSize: "16px",
+                    cursor: "pointer",
+                    "&:hover": {
+                      color: colors.greenAccent[500]
+                    }
+                  }} 
+                />
+              </Tooltip>
+            </Box>
             <StatBox
               title={unrealizedGain !== null ? `$${unrealizedGain.value.toLocaleString()}` : "N/A"}
               increase={unrealizedGain !== null ? unrealizedGain.percentage.toFixed(2) : "N/A"}

@@ -399,7 +399,7 @@ const Order = ({ open, onClose }) => {
 
                 <Box mb={2}>
                     <Typography variant="body2" color={colors.grey[300]}>
-                    Current Price
+                    Estimated Current Price
                     </Typography>
                     <Typography variant="h6" color={colors.greenAccent[400]}>
                     ${currentPrice.toLocaleString()}
@@ -434,50 +434,6 @@ const Order = ({ open, onClose }) => {
                     </Button>
                     </ButtonGroup>
                 </Box>
-
-                <Box mb={3}>
-                    <ButtonGroup fullWidth variant="outlined" size="small">
-                    <Button
-                        onClick={() => handleOrderTypeChange('market')}
-                        variant={orderType === 'market' ? 'contained' : 'outlined'}
-                        sx={{ color: colors.grey[100] }}
-                    >
-                        Market
-                    </Button>
-                    <Button
-                        onClick={() => handleOrderTypeChange('limit')}
-                        variant={orderType === 'limit' ? 'contained' : 'outlined'}
-                        sx={{ color: colors.grey[100] }}
-                    >
-                        Limit
-                    </Button>
-                    </ButtonGroup>
-                </Box>
-
-
-                <TextField
-                    fullWidth
-                    label="Price"
-                    value={orderType === 'market' ? currentPrice.toString() : price}
-                    onChange={handlePriceChange}
-                    type="number"
-                    disabled={orderType === 'market'}
-                    InputProps={{
-                    endAdornment: <InputAdornment position="end">USDT</InputAdornment>,
-                    sx: { color: colors.grey[100] }
-                    }}
-                    InputLabelProps={{ sx: { color: colors.grey[300] } }}
-                    sx={{ 
-                    mb: 2,
-                    opacity: orderType === 'market' ? 0.6 : 1,
-                    '& .MuiOutlinedInput-root': {
-                        '& fieldset': { borderColor: colors.grey[600] },
-                        '&:hover fieldset': { borderColor: colors.grey[500] },
-                        '&.Mui-focused fieldset': { borderColor: colors.primary[200] },
-                    }
-                    }}
-                />
-
 
                 <TextField
                     fullWidth
